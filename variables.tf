@@ -80,10 +80,7 @@ variable "ec2_extra_security_groups" {
   description = "List of additional security group IDs to append to the EC2 instances for running GitHub jobs. Defaults to an empty list. All runners will be allowed unrestricted egress traffic on ports 80, 443 and ICMP as standard"
   default     = []
   validation {
-    condition = length([
-      for sg in var.ec2_extra_security_groups :
-      true if can(regex("^sg-[0-9a-f]{17}$", sg))
-    ]) == length(var.ec2_extra_security_groups)
+    condition     = can([for sg in var.ec2_extra_security_groups : regex("^sg-[0-9a-f]{17}$", sg)])
     error_message = "Invalid security group ID. A valid security group ID must start with 'sg-' followed by 17 alphanumeric characters."
   }
 }
@@ -105,10 +102,7 @@ variable "ec2_iam_role_extra_policy_attachments" {
   description = "List of policy ARNs to append to the runner's EC2 Instance Profile. Use this to give your runner permission to deploy things in your accounts."
   default     = []
   validation {
-    condition = length([
-      for arn in var.ec2_iam_role_extra_policy_attachments :
-      true if can(regex("^arn:aws:iam::[0-9]+:.*$", arn))
-    ]) == length(var.ec2_iam_role_extra_policy_attachments)
+    condition     = can([for arn in var.ec2_iam_role_extra_policy_attachments : regex("^arn:aws:iam::[0-9]+:.*$", arn)])
     error_message = "Invalid Amazon Resource Name. A valid IAM Policy ARN must start with 'arn:aws:iam', followed by a region, account ID and resource name separated by colons."
   }
 }
@@ -199,10 +193,7 @@ variable "ec2_subnet_ids" {
   type        = list(string)
   description = "List of IDs of the subnets used to host the EC2 instances for running GitHub jobs"
   validation {
-    condition = length([
-      for arn in var.ec2_subnet_ids :
-      true if can(regex("^subnet-[a-fA-F0-9]{8,}$", arn))
-    ]) == length(var.ec2_subnet_ids)
+    condition     = can([for arn in var.ec2_subnet_ids : regex("^subnet-[a-fA-F0-9]{8,}$", arn)])
     error_message = "Invalid Subnet ID. A valid Subnet ID must start with 'subnet-', followed by at least 8 digits"
   }
 }
@@ -212,10 +203,7 @@ variable "ec2_terraform_deployment_roles" {
   description = "List of deployment role ARNs that can be assumed by the runner in order to execute Terraform commands. The runner will be granted permission to assume these roles. The roles can be in different AWS accounts. This is an alternative to giving the runner permissions directly via policy attachments."
   default     = []
   validation {
-    condition = length([
-      for arn in var.ec2_terraform_deployment_roles :
-      true if can(regex("^arn:aws:iam::[0-9*]+:.*$", arn))
-    ]) == length(var.ec2_terraform_deployment_roles)
+    condition     = can([for arn in var.ec2_terraform_deployment_roles : regex("^arn:aws:iam::[0-9*]+:.*$", arn)])
     error_message = "Invalid Amazon Resource Name. A valid IAM Role ARN must start with 'arn:aws:iam', followed by a region, account ID and resource name separated by colons."
   }
 }
@@ -257,10 +245,7 @@ variable "iam_roles_with_admin_access_to_created_resources" {
   type        = list(string)
   description = "List of IAM Role ARNs that should have admin access to any resources created in this module that have resource policies"
   validation {
-    condition = length([
-      for arn in var.iam_roles_with_admin_access_to_created_resources :
-      true if can(regex("^arn:aws:iam::[0-9]+:.*$", arn))
-    ]) == length(var.iam_roles_with_admin_access_to_created_resources)
+    condition     = can([for arn in var.iam_roles_with_admin_access_to_created_resources : regex("^arn:aws:iam::[0-9]+:.*$", arn)])
     error_message = "Invalid Amazon Resource Name. A valid IAM Role ARN must start with 'arn:aws:iam', followed by a region, account ID and resource name separated by colons."
   }
 }
@@ -270,10 +255,7 @@ variable "iam_roles_with_read_access_to_created_resources" {
   description = "List of IAM Role ARNs that should have read access to any resources created in this module that have resource policies"
   default     = []
   validation {
-    condition = length([
-      for arn in var.iam_roles_with_read_access_to_created_resources :
-      true if can(regex("^arn:aws:iam::[0-9]+:.*$", arn))
-    ]) == length(var.iam_roles_with_read_access_to_created_resources)
+    condition     = can([for arn in var.iam_roles_with_read_access_to_created_resources : regex("^arn:aws:iam::[0-9]+:.*$", arn)])
     error_message = "Invalid Amazon Resource Name. A valid IAM Role ARN must start with 'arn:aws:iam', followed by a region, account ID and resource name separated by colons."
   }
 }
