@@ -1,0 +1,51 @@
+name: install docker images
+description: Downloads the latest docker images so they are cached before any jobs run
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: EcrLogin
+        action: ExecuteBash
+        onFailure: Abort
+        inputs:
+          commands:
+            - |
+              aws --region ${REGION} ecr get-login-password | docker login --username AWS --password-stdin ${DOCKER_REGISTRY_ID}
+      - name: PullImage
+        action: ExecuteBash
+        onFailure: Abort
+        inputs:
+          commands:
+            - |
+              for reponame in ${DOCKER_REPO_NAMES}; do
+                docker pull ${DOCKER_REGISTRY_ID}/$${reponame}
+              done
+  - name: validate
+    steps:
+      - name: Fail
+        action: ExecuteBash
+        inputs:
+          commands:
+            - echo 1
+      - name: EcrLogin
+        action: ExecuteBash
+        onFailure: Abort
+        inputs:
+          commands:
+            - |
+              aws --region ${REGION} ecr get-login-password | docker login --username AWS --password-stdin ${DOCKER_REGISTRY_ID}
+      - name: LocateImage
+        action: ExecuteBash
+        onFailure: Abort
+        inputs:
+          commands:
+            - |
+              for reponame in ${DOCKER_REPO_NAMES}; do
+                IMAGE_ID=$(docker images --quiet ${DOCKER_REGISTRY_ID}/$${reponame})
+                if [ -n "$${IMAGE_ID}" ]; then
+                  echo "The $${reponame} docker image is cached."
+                else
+                  echo "The $${reponame} docker image has not been cached. Failing build."
+                  exit {{ validate.Fail.outputs.stdout }}
+                fi
+              done
