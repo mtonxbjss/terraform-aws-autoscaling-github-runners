@@ -14,7 +14,6 @@ content: |-
   {{ .Inputs }}
   {{ .Outputs }}
   {{ .Providers }}
-  {{ .Resources }}
 
 output:
   file: "README.md"

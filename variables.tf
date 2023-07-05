@@ -179,7 +179,7 @@ variable "ec2_root_volume_size" {
 
 variable "ec2_runner_role_tag" {
   type        = string
-  description = "Adds a new Role tag to each runner with this value, to indicate the functional role performed by particular group of runners"
+  description = "Adds a new EC2 tag named Role to each runner with this value, to indicate the functional role performed by particular group of runners"
   default     = "general"
 }
 
@@ -209,7 +209,7 @@ variable "ec2_subnet_ids" {
 
 variable "ec2_terraform_deployment_roles" {
   type        = list(string)
-  description = "List of deployment role ARNs that can be assumed by the runner in order to execute Terraform commands. The runner will be granted permission to assume these roles"
+  description = "List of deployment role ARNs that can be assumed by the runner in order to execute Terraform commands. The runner will be granted permission to assume these roles. The roles can be in different AWS accounts. This is an alternative to giving the runner permissions directly via policy attachments."
   default     = []
   validation {
     condition = length([

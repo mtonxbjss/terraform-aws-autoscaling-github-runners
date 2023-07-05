@@ -1,4 +1,4 @@
-## imagebuilder-github-runner-ami Module
+## imagebuilder-github-runner-ami SubModule
 
 ### Pre-Requisites
 Before deploying this module you must:
@@ -28,63 +28,62 @@ This is an imagebuilder pipeline to generate a GitHub Runner AMI using default v
 
 ```terraform
 module "imagebuilder_github_runner_ami_simple" {
-source = "git::https://github.com/mtonxbjss/ghrunner.git//imagebuilder-github-runner-ami"
+  source = "git::https://github.com/mtonxbjss/terraform-aws-autoscaling-github-runners//modules/imagebuilder-github-runner-ami?ref=v1.0.0"
 
-ami_build_pipeline_cron_expression = "0 4 ? * MON *"
-ami_version_number                 = "1.0.0"
+  ami_build_pipeline_cron_expression         = "0 4 ? * MON *"
+  ami_version_number                         = "1.0.0"
+  github_runner_binary_version               = "2.305.0"
 
-github_runner_binary_version = "2.299.2"
+  iam_roles_with_admin_access_to_created_resources = [
+    local.identifiers.account_admin_role_arn,
+  ]
 
-imagebuilder_ec2_subnet_id = module.vpc.private_subnets[0]
-imagebuilder_ec2_vpc_id    = module.vpc.vpc_id
-
-imagebuilder_log_bucket_encryption_key_arn = aws_kms_key.cicd.arn
-imagebuilder_log_bucket_name               = aws_s3_bucket.cicd.bucket
-imagebuilder_log_bucket_path               = "github-runner/ami-logs/github"
-
-iam_roles_with_admin_access_to_created_resources = [
-local.identifiers.account_admin_role_arn,
-]
-
-region            = var.region
-runner_account_id = var.aws_account_id
-unique_prefix     = "${local.prefix}-simple"
+  imagebuilder_ec2_subnet_id                 = module.vpc.private_subnets[0]
+  imagebuilder_ec2_vpc_id                    = module.vpc.vpc_id
+  imagebuilder_log_bucket_encryption_key_arn = aws_kms_key.mylogs.arn
+  imagebuilder_log_bucket_name               = aws_s3_bucket.mylogs.bucket
+  imagebuilder_log_bucket_path               = "github-runner/ami-logs/github"
+  region                                     = var.region
+  runner_account_id                          = var.aws_account_id
+  unique_prefix                              = "${local.prefix}-min"
 }
 ```
 
-### Full Worked Example with All Parameters Expressed
+### Full Worked Example with Most Parameters Expressed
 This is an imagebuilder pipeline to generate a GitHub Runner AMI overriding default values
 
 ```terraform
 module "imagebuilder_github_runner_ami" {
-source = "git::https://github.com/mtonxbjss/ghrunner.git//imagebuilder-github-runner-ami"
+  source = "git::https://github.com/mtonxbjss/terraform-aws-autoscaling-github-runners//modules/imagebuilder-github-runner-ami?ref=v1.0.0"
 
-ami_build_pipeline_cron_expression = "0 4 ? * MON *"
-ami_version_number                 = "1.0.0"
+  ami_build_pipeline_cron_expression    = "0 4 ? * MON *"
+  ami_sharing_account_id_list          = [ "012345678901" ]
+  ami_version_number                    = "1.0.0"
 
-github_job_image_ecr_account_id       = var.aws_account_id
-github_job_image_ecr_repository_names = [ "${aws_ecr_repository.terraform.name}:latest" ]
-github_runner_binary_version          = "2.299.2"
+  github_job_image_ecr_account_id       = var.aws_account_id
+  github_job_image_ecr_repository_names = [ "${aws_ecr_repository.myimage.name}:latest" ]
+  github_runner_binary_version          = "2.305.0"
 
-imagebuilder_ec2_encryption                 = "CMK"
-imagebuilder_ec2_instance_type              = "t3a.large"
-imagebuilder_ec2_root_volume_size           = 100
-imagebuilder_ec2_subnet_id                  = module.vpc.private_subnets[0]
-imagebuilder_ec2_terminate_on_failure       = false
-imagebuilder_ec2_vpc_id                     = module.vpc.vpc_id
-imagebuilder_log_bucket_encryption_key_arn  = aws_kms_key.cicd.arn
-imagebuilder_log_bucket_name                = aws_s3_bucket.cicd.bucket
-imagebuilder_log_bucket_path                = "github-runner/ami-logs/github"
+  iam_roles_with_admin_access_to_created_resources = [
+    local.identifiers.account_admin_role_arn,
+  ]
 
-iam_roles_with_admin_access_to_created_resources = [
-local.identifiers.app_deployer_role_arn,
-local.identifiers.account_admin_role_arn,
-]
-
-permission_boundary_arn = aws_iam_policy.permissions_boundary.arn
-region                  = var.region
-runner_account_id       = var.aws_account_id
-unique_prefix           = local.prefix
+  imagebuilder_ec2_encryption                 = "CMK"
+  imagebuilder_ec2_extra_security_groups      = [ aws_security_group.allinstances.arn ]
+  imagebuilder_ec2_instance_type              = "t3a.large"
+  imagebuilder_ec2_root_volume_size           = 100
+  imagebuilder_ec2_subnet_id                  = module.vpc.private_subnets[0]
+  imagebuilder_ec2_terminate_on_failure       = false
+  imagebuilder_ec2_vpc_id                     = module.vpc.vpc_id
+  imagebuilder_log_bucket_encryption_key_arn  = aws_kms_key.cicd.arn
+  imagebuilder_log_bucket_name                = aws_s3_bucket.cicd.bucket
+  imagebuilder_log_bucket_path                = "github-runner/ami-logs/github"
+  kms_deletion_window_in_days                 = 30
+  permission_boundary_arn                     = aws_iam_policy.permissions_boundary.arn
+  region                                      = var.region
+  resource_tags                               = {}
+  runner_account_id                           = var.aws_account_id
+  unique_prefix                               = "${local.prefix}-max"
 }
 ```
 
@@ -99,11 +98,11 @@ unique_prefix           = local.prefix
 | <a name="input_ami_sharing_account_id_list"></a> [ami\_sharing\_account\_id\_list](#input\_ami\_sharing\_account\_id\_list) | A list of additional AWS account IDs that you want to share your completed AMI with. Does not need to include the account in which the AMI is built as this is included by default | `list(string)` | `[]` | no |
 | <a name="input_ami_version_number"></a> [ami\_version\_number](#input\_ami\_version\_number) | Sematic versioning version number of the AMI to be created. Defaults to 1.0.0 | `string` | `"1.0.0"` | no |
 | <a name="input_github_job_image_ecr_account_id"></a> [github\_job\_image\_ecr\_account\_id](#input\_github\_job\_image\_ecr\_account\_id) | The AWS account ID that hosts the private ECR registry for job docker images. Defaults to empty (i.e. no private repository required) | `string` | `""` | no |
-| <a name="input_github_job_image_ecr_repository_names"></a> [github\_job\_image\_ecr\_repository\_names](#input\_github\_job\_image\_ecr\_repository\_names) | A list of names of ECR repositories for job docker images. Include the version to pull after a colon. Defaults to empty (i.e. no private repository required). Latest images from each of these repos will be downloaded and cached whilst making the AMI to allow faster running of jobs | `list(string)` | `[]` | no |
-| <a name="input_github_runner_binary_bucket_encryption_key_arn"></a> [github\_runner\_binary\_bucket\_encryption\_key\_arn](#input\_github\_runner\_binary\_bucket\_encryption\_key\_arn) | Encryption key ARN for the bucket that stores the version of the GitHub Runner binary that you want to use. Defaults to empty (i.e. no encryption) | `string` | `""` | no |
-| <a name="input_github_runner_binary_bucket_name"></a> [github\_runner\_binary\_bucket\_name](#input\_github\_runner\_binary\_bucket\_name) | Bucket that stores the version of the GitHub Runner binary that you want to use | `string` | `""` | no |
-| <a name="input_github_runner_binary_bucket_path"></a> [github\_runner\_binary\_bucket\_path](#input\_github\_runner\_binary\_bucket\_path) | Bucket path that stores the version of the GitHub Runner binary that you want to use | `string` | `""` | no |
-| <a name="input_github_runner_binary_version"></a> [github\_runner\_binary\_version](#input\_github\_runner\_binary\_version) | Version ID of the github runner binary to cache in the AMI image. No default, because GitHub doesn't support out of date versions for very long. | `string` | `""` | no |
+| <a name="input_github_job_image_ecr_repository_names"></a> [github\_job\_image\_ecr\_repository\_names](#input\_github\_job\_image\_ecr\_repository\_names) | A list of names of ECR repositories for job docker images. Include the version to pull after a colon. Defaults to empty (i.e. no private repository required). The required versions of the images from each of these repos will be downloaded and cached whilst making the AMI to allow faster running of workflow jobs | `list(string)` | `[]` | no |
+| <a name="input_github_runner_binary_bucket_encryption_key_arn"></a> [github\_runner\_binary\_bucket\_encryption\_key\_arn](#input\_github\_runner\_binary\_bucket\_encryption\_key\_arn) | Encryption key ARN for the bucket that stores the version of the GitHub Runner binary that you want to use. Defaults to empty (i.e. no encryption). Only required if you are not using the github\_runner\_binary\_version input variable. | `string` | `""` | no |
+| <a name="input_github_runner_binary_bucket_name"></a> [github\_runner\_binary\_bucket\_name](#input\_github\_runner\_binary\_bucket\_name) | Bucket that stores the version of the GitHub Runner binary that you want to use. Only required if you are not using the github\_runner\_binary\_version input variable. | `string` | `""` | no |
+| <a name="input_github_runner_binary_bucket_path"></a> [github\_runner\_binary\_bucket\_path](#input\_github\_runner\_binary\_bucket\_path) | Bucket path that stores the version of the GitHub Runner binary that you want to use. Only required if you are not using the github\_runner\_binary\_version input variable. | `string` | `""` | no |
+| <a name="input_github_runner_binary_version"></a> [github\_runner\_binary\_version](#input\_github\_runner\_binary\_version) | Version ID of the github runner binary to cache in the AMI image. No default, because GitHub doesn't support out of date versions for very long. Only required if you are not using the github\_binary\_bucket\_* input variables. | `string` | `""` | no |
 | <a name="input_iam_roles_with_admin_access_to_created_resources"></a> [iam\_roles\_with\_admin\_access\_to\_created\_resources](#input\_iam\_roles\_with\_admin\_access\_to\_created\_resources) | List of IAM Role ARNs that should have admin access to any resources created in this module that have resource policies | `list(string)` | n/a | yes |
 | <a name="input_imagebuilder_ec2_encryption"></a> [imagebuilder\_ec2\_encryption](#input\_imagebuilder\_ec2\_encryption) | Type of encryption to use for the resulting GitHub AMI (AWS, CMK, None) | `string` | `"None"` | no |
 | <a name="input_imagebuilder_ec2_extra_security_groups"></a> [imagebuilder\_ec2\_extra\_security\_groups](#input\_imagebuilder\_ec2\_extra\_security\_groups) | List of security group IDs to append to the temporary EC2 instance that will be created in order to generate the AMI. Defaults to an empty list | `list(string)` | `[]` | no |
@@ -131,28 +130,4 @@ unique_prefix           = local.prefix
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.31.0 |
-## Resources
-
-| Name | Type |
-|------|------|
-| [aws_cloudwatch_log_group.imagebuilder](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
-| [aws_iam_instance_profile.github_image_builder](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_instance_profile) | resource |
-| [aws_iam_policy.github_image_builder](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_role.github_image_builder](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role_policy_attachment.github_image_builder](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_imagebuilder_component.github](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/imagebuilder_component) | resource |
-| [aws_imagebuilder_distribution_configuration.github](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/imagebuilder_distribution_configuration) | resource |
-| [aws_imagebuilder_image_pipeline.github](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/imagebuilder_image_pipeline) | resource |
-| [aws_imagebuilder_image_recipe.github](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/imagebuilder_image_recipe) | resource |
-| [aws_imagebuilder_infrastructure_configuration.github](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/imagebuilder_infrastructure_configuration) | resource |
-| [aws_kms_alias.github_imagebuilder](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
-| [aws_kms_key.github_imagebuilder](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
-| [aws_security_group.github_imagebuilder](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
-| [aws_security_group_rule.egress_http](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
-| [aws_security_group_rule.egress_https](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
-| [aws_ami.ubuntu_latest](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
-| [aws_iam_policy_document.github_image_builder](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.github_image_builder_assumerole](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.kms_key_github_imagebuilder](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_kms_key.aws_ebs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 <!-- END_TF_DOCS -->

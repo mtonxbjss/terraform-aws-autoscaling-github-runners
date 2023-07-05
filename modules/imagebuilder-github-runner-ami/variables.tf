@@ -32,7 +32,7 @@ variable "github_job_image_ecr_account_id" {
 
 variable "github_job_image_ecr_repository_names" {
   type        = list(string)
-  description = "A list of names of ECR repositories for job docker images. Include the version to pull after a colon. Defaults to empty (i.e. no private repository required). Latest images from each of these repos will be downloaded and cached whilst making the AMI to allow faster running of jobs"
+  description = "A list of names of ECR repositories for job docker images. Include the version to pull after a colon. Defaults to empty (i.e. no private repository required). The required versions of the images from each of these repos will be downloaded and cached whilst making the AMI to allow faster running of workflow jobs"
   default     = []
   validation {
     condition = length([
@@ -45,7 +45,7 @@ variable "github_job_image_ecr_repository_names" {
 
 variable "github_runner_binary_bucket_encryption_key_arn" {
   type        = string
-  description = "Encryption key ARN for the bucket that stores the version of the GitHub Runner binary that you want to use. Defaults to empty (i.e. no encryption)"
+  description = "Encryption key ARN for the bucket that stores the version of the GitHub Runner binary that you want to use. Defaults to empty (i.e. no encryption). Only required if you are not using the github_runner_binary_version input variable."
   default     = ""
   validation {
     condition     = can(regex("^(arn:aws:kms:[a-z0-9-]+:[0-9]+:.*)?$", var.github_runner_binary_bucket_encryption_key_arn))
@@ -55,19 +55,19 @@ variable "github_runner_binary_bucket_encryption_key_arn" {
 
 variable "github_runner_binary_bucket_name" {
   type        = string
-  description = "Bucket that stores the version of the GitHub Runner binary that you want to use"
+  description = "Bucket that stores the version of the GitHub Runner binary that you want to use. Only required if you are not using the github_runner_binary_version input variable."
   default     = ""
 }
 
 variable "github_runner_binary_bucket_path" {
   type        = string
-  description = "Bucket path that stores the version of the GitHub Runner binary that you want to use"
+  description = "Bucket path that stores the version of the GitHub Runner binary that you want to use. Only required if you are not using the github_runner_binary_version input variable."
   default     = ""
 }
 
 variable "github_runner_binary_version" {
   type        = string
-  description = "Version ID of the github runner binary to cache in the AMI image. No default, because GitHub doesn't support out of date versions for very long."
+  description = "Version ID of the github runner binary to cache in the AMI image. No default, because GitHub doesn't support out of date versions for very long. Only required if you are not using the github_binary_bucket_* input variables."
   default     = ""
   validation {
     condition     = can(regex("^((0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*))?$", var.github_runner_binary_version))

@@ -6,7 +6,7 @@ variable "container_build_pipeline_cron_expression" {
 
 variable "container_sharing_account_id_list" {
   type        = list(string)
-  description = "A list of additional AWS account IDs that you want to share your completed container with. Does not need to include the account in which the AMI is built as this is included by default"
+  description = "A list of additional AWS account IDs that you want to share your completed container image with. Does not need to include the account in which the AMI is built as this is included by default"
   default     = []
 }
 
