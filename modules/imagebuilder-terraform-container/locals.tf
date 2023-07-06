@@ -7,7 +7,7 @@ locals {
 
   resource_tags = merge(
     {
-      "TfModule" : "mtonxbjss/ghrunner/imagebuilder-terraform-container",
+      "TfModule" : "mtonxbjss/terraform-aws-autoscaling-github-runners//modules/imagebuilder-terraform-container",
     },
     var.resource_tags
   )

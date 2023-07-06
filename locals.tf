@@ -1,7 +1,7 @@
 locals {
   resource_tags = merge(
     {
-      "TfModule" : "mtonxbjss/ghrunner/ec2-github-runner",
+      "TfModule" : "mtonxbjss/terraform-aws-autoscaling-github-runners",
     },
     var.resource_tags
   )
