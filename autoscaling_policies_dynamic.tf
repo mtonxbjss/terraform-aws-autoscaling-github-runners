@@ -134,10 +134,10 @@ resource "aws_cloudwatch_metric_alarm" "dynamic_scale_in_free_capacity" {
   count               = var.ec2_dynamic_scaling_enabled ? 1 : 0
   alarm_name          = "${var.unique_prefix}-${var.ec2_github_runner_name}-dynamic-scale-in-fc"
   alarm_description   = "AUTOSCALING: Drives the dynamic scaling in (removing instances) of the github runners based on the amount of free capacity"
-  evaluation_periods  = "6"                                        // within the 6 most recent periods
+  evaluation_periods  = "10"                                       // within the 10 most recent periods
   comparison_operator = "GreaterThanOrEqualToThreshold"            // scale in if the "free capacity" metric is greater than or equal to
   threshold           = var.ec2_maximum_concurrent_github_jobs * 3 // 3x the concurrency of a single runner
-  datapoints_to_alarm = "6"                                        // in all 6 of those 6 evaluated periods
+  datapoints_to_alarm = "10"                                       // in all 10 of those 10 evaluated periods
   treat_missing_data  = "notBreaching"                             // (treat missing data as free capacity = 0)
 
   actions_enabled = "true"
