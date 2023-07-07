@@ -1,5 +1,12 @@
 # #@filename_check_ignore - file contains multiple policies of equal importance so plural filename is ok
 
+locals {
+  scale_out_concurrency = (var.ec2_maximum_concurrent_github_jobs * -1)
+  scale_out_threshold   = (var.ec2_maximum_concurrent_github_jobs * -1)
+  scale_in_concurrency  = var.ec2_maximum_concurrent_github_jobs
+  scale_in_threshold    = var.ec2_maximum_concurrent_github_jobs * 3
+}
+
 resource "aws_autoscaling_policy" "dynamic_scale_out" {
   count                     = var.ec2_dynamic_scaling_enabled ? 1 : 0
   name                      = "${var.unique_prefix}-dynamic-scale-out"
@@ -7,33 +14,54 @@ resource "aws_autoscaling_policy" "dynamic_scale_out" {
   adjustment_type           = "ChangeInCapacity"
   policy_type               = "StepScaling"
   metric_aggregation_type   = "Average"
-  estimated_instance_warmup = 300
+  estimated_instance_warmup = 180
 
   step_adjustment {
-    scaling_adjustment          = 2
-    metric_interval_upper_bound = ""
-    metric_interval_lower_bound = -5
+    scaling_adjustment          = 2                                                             # scale out 2 instances if underprovisioned by
+    metric_interval_upper_bound = ""                                                            # up to
+    metric_interval_lower_bound = (2 * local.scale_out_concurrency) + local.scale_out_threshold # 2x concurrency
   }
   step_adjustment {
-    scaling_adjustment          = 4
-    metric_interval_upper_bound = -5
-    metric_interval_lower_bound = -15
+    scaling_adjustment          = 4                                                             # scale out 4 instances if underprovisioned by
+    metric_interval_upper_bound = (2 * local.scale_out_concurrency) + local.scale_out_threshold # between 2x concurrency
+    metric_interval_lower_bound = (6 * local.scale_out_concurrency) + local.scale_out_threshold # and 6x concurrency
   }
   step_adjustment {
-    scaling_adjustment          = 6
-    metric_interval_upper_bound = -15
-    metric_interval_lower_bound = ""
+    scaling_adjustment          = 6                                                             # scale out 4 instances if underprovisioned by
+    metric_interval_upper_bound = (6 * local.scale_out_concurrency) + local.scale_out_threshold # between 6x concurrency
+    metric_interval_lower_bound = (8 * local.scale_out_concurrency) + local.scale_out_threshold # and 8x concurrency
+  }
+  step_adjustment {
+    scaling_adjustment          = 8                                                             # scale out 8 instances if underprovisioned by
+    metric_interval_upper_bound = (8 * local.scale_out_concurrency) + local.scale_out_threshold # 8x concurrency
+    metric_interval_lower_bound = ""                                                            # or more
   }
 }
 
 resource "aws_autoscaling_policy" "dynamic_scale_in" {
-  count                  = var.ec2_dynamic_scaling_enabled ? 1 : 0
-  name                   = "${var.unique_prefix}-dynamic-scale-in"
-  scaling_adjustment     = -1
-  policy_type            = "SimpleScaling"
-  adjustment_type        = "ChangeInCapacity"
-  cooldown               = 600
-  autoscaling_group_name = aws_autoscaling_group.github_runner.name
+  count                     = var.ec2_dynamic_scaling_enabled ? 1 : 0
+  name                      = "${var.unique_prefix}-dynamic-scale-in"
+  autoscaling_group_name    = aws_autoscaling_group.github_runner.name
+  adjustment_type           = "ChangeInCapacity"
+  policy_type               = "StepScaling"
+  metric_aggregation_type   = "Average"
+  estimated_instance_warmup = 180
+
+  step_adjustment {
+    scaling_adjustment          = -2                                                          # scale in 2 instances if overprovisioned by
+    metric_interval_lower_bound = ""                                                          # up to
+    metric_interval_upper_bound = (5 * local.scale_in_concurrency) - local.scale_in_threshold # 5x concurrency
+  }
+  step_adjustment {
+    scaling_adjustment          = -4                                                          # scale in 4 instances if overprovisioned by
+    metric_interval_lower_bound = (5 * local.scale_in_concurrency) - local.scale_in_threshold # between 5x concurrency
+    metric_interval_upper_bound = (8 * local.scale_in_concurrency) - local.scale_in_threshold # and 8x concurrency
+  }
+  step_adjustment {
+    scaling_adjustment          = -6                                                          # scale in 6 instances if overprovisioned by
+    metric_interval_lower_bound = (8 * local.scale_in_concurrency) - local.scale_in_threshold # 8x concurrency
+    metric_interval_upper_bound = ""                                                          # or higher
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "dynamic_scale_out_free_capacity" {
@@ -132,7 +160,7 @@ resource "aws_cloudwatch_metric_alarm" "dynamic_scale_in_free_capacity" {
       stat        = "Average"                 // the average of
       namespace   = "AWS/AutoScaling"         // the AWS/AutoScaling
       metric_name = "GroupInServiceInstances" // GroupInServiceInstances metric
-      period      = "300"                     // over 300 seconds (5 mins)
+      period      = "60"                      // over 60 seconds (1 min)
       dimensions = {
         AutoScalingGroupName = aws_autoscaling_group.github_runner.name
       }
@@ -146,7 +174,7 @@ resource "aws_cloudwatch_metric_alarm" "dynamic_scale_in_free_capacity" {
       stat        = "Maximum"                                      // the average of
       namespace   = local.cloudwatch_logs_metric_filters_namespace // the custom
       metric_name = "githubRunning"                                // githubRunning metric
-      period      = "300"                                          // over 300 seconds (5 mins)
+      period      = "60"                                           // over 60 seconds (1 min)
       dimensions = {
         Tag = var.ec2_github_runner_tag_list
       }
@@ -160,7 +188,7 @@ resource "aws_cloudwatch_metric_alarm" "dynamic_scale_in_free_capacity" {
       stat        = "Sum"                                          // the average of
       namespace   = local.cloudwatch_logs_metric_filters_namespace // the custom
       metric_name = "githubQueued"                                 // githubPending metric
-      period      = "300"                                          // over 300 seconds (5 mins)
+      period      = "60"                                           // over 60 seconds (1 min)
       dimensions = {
         Tag = var.ec2_github_runner_tag_list
       }

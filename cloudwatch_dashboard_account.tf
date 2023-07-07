@@ -13,8 +13,8 @@ resource "aws_cloudwatch_dashboard" "account" {
       TAG_LIST                  = var.ec2_github_runner_tag_list
       CONCURRENT_JOBS           = var.ec2_maximum_concurrent_github_jobs
       SCALE_IN_AT_FREE_CAPACITY = var.ec2_maximum_concurrent_github_jobs * 3
-      Y_AXIS_MIN                = var.ec2_maximum_concurrent_github_jobs * -2
-      Y_AXIS_MAX                = var.ec2_maximum_concurrent_github_jobs * 4
+      Y_AXIS_MIN                = var.ec2_maximum_concurrent_github_jobs * (var.ec2_autoscaling_maximum_instances * -1)
+      Y_AXIS_MAX                = var.ec2_maximum_concurrent_github_jobs * var.ec2_autoscaling_maximum_instances
     }
   )
 }
