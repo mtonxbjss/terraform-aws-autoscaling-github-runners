@@ -242,7 +242,7 @@
         "metrics": [
           [
             {
-              "expression": "(ar*2)-(rj+pj)",
+              "expression": "(ar*${CONCURRENT_JOBS})-(rj+pj)",
               "label": "Free Capacity",
               "id": "fc",
               "yAxis": "left",
@@ -302,19 +302,19 @@
             {
               "color": "#d62728",
               "label": "Add Runners if below",
-              "value": 2,
+              "value": ${CONCURRENT_JOBS},
               "fill": "below"
             },
             {
               "color": "#2ca02c",
               "label": "Remove Runners if above",
-              "value": 5,
+              "value": ${SCALE_IN_AT_FREE_CAPACITY},
               "fill": "above"
             }
           ]
         },
         "yAxis": {
-          "left": { "label": "Jobs", "showUnits": false, "min": -6, "max": 12 },
+          "left": { "label": "Jobs", "showUnits": false, "min": ${Y_AXIS_MIN}, "max": ${Y_AXIS_MAX} },
           "right": { "label": "Jobs", "showUnits": false }
         },
         "legend": { "position": "hidden" }
