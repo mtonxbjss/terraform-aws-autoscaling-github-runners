@@ -145,7 +145,7 @@ variable "ec2_maximum_concurrent_github_jobs" {
 
 variable "ec2_nightly_shutdown_enabled" {
   type        = bool
-  description = "scale in/out the runners on a nightly basis"
+  description = "scale in the runners on a nightly basis"
   default     = false
 }
 
@@ -153,6 +153,12 @@ variable "ec2_nightly_shutdown_scale_in_time" {
   type        = string
   description = "time to scale in"
   default     = "0 20 * * *"
+}
+
+variable "ec2_morning_scaleout_enabled" {
+  type        = bool
+  description = "scale out the runners on a nightly basis"
+  default     = false
 }
 
 variable "ec2_nightly_shutdown_scale_out_time" {
