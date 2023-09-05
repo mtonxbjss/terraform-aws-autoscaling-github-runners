@@ -6,6 +6,7 @@ resource "aws_imagebuilder_image_pipeline" "github" {
   distribution_configuration_arn   = aws_imagebuilder_distribution_configuration.github.arn
 
   schedule {
-    schedule_expression = "cron(${var.ami_build_pipeline_cron_expression})"
+    schedule_expression                = "cron(${var.ami_build_pipeline_cron_expression})"
+    pipeline_execution_start_condition = "EXPRESSION_MATCH_ONLY"
   }
 }

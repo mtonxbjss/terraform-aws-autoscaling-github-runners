@@ -40,7 +40,7 @@ variable "iam_roles_with_admin_access_to_created_resources" {
   type        = list(string)
   description = "List of IAM Role ARNs that should have admin access to any resources created in this module that have resource policies"
   validation {
-    condition = can([for arn in var.iam_roles_with_admin_access_to_created_resources : regex("^arn:aws:iam::[0-9]+:.*$", arn)])
+    condition     = can([for arn in var.iam_roles_with_admin_access_to_created_resources : regex("^arn:aws:iam::[0-9]+:.*$", arn)])
     error_message = "Invalid Amazon Resource Name. A valid IAM Role ARN must start with 'arn:aws:iam', followed by a region, account ID and resource name separated by colons."
   }
 }
@@ -50,7 +50,7 @@ variable "imagebuilder_ec2_extra_security_groups" {
   description = "List of security group IDs to append to the temporary EC2 instance that will be created in order to generate the AMI. Defaults to an empty list"
   default     = []
   validation {
-    condition = can([for sg in var.imagebuilder_ec2_extra_security_groups : regex("^sg-[0-9a-f]{17}$", sg)])
+    condition     = can([for sg in var.imagebuilder_ec2_extra_security_groups : regex("^sg-[0-9a-f]{17}$", sg)])
     error_message = "Invalid security group ID. A valid security group ID must start with 'sg-' followed by 17 alphanumeric characters."
   }
 }
