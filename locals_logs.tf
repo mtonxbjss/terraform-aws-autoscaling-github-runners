@@ -7,7 +7,6 @@ locals {
     "/var/log/cloud-init-output.log"                                    = "%b %d %H:%M:%S"
     "/var/log/syslog"                                                   = "%b %d %H:%M:%S"
     "/var/log/amazon/ssm/amazon-ssm-agent.log"                          = "%Y-%m-%d %H:%M:%S"
-    "/var/log/github-scale-in-protection.log"                           = "%Y-%m-%d %H:%M:%S"
     "/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log" = "%Y-%m-%dT%H:%M:%S"
   }
 

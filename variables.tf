@@ -161,7 +161,7 @@ variable "ec2_morning_scaleout_enabled" {
   default     = false
 }
 
-variable "ec2_nightly_shutdown_scale_out_time" {
+variable "ec2_morning_scaleout_time" {
   type        = string
   description = "time to scale out"
   default     = "0 6 * * 1-5"
