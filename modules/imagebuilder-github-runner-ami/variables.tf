@@ -35,7 +35,7 @@ variable "github_job_image_ecr_repository_names" {
   description = "A list of names of ECR repositories for job docker images. Include the version to pull after a colon. Defaults to empty (i.e. no private repository required). The required versions of the images from each of these repos will be downloaded and cached whilst making the AMI to allow faster running of workflow jobs"
   default     = []
   validation {
-    condition = can([for repo in var.github_job_image_ecr_repository_names : regex("^.*:.*$", repo)])
+    condition     = can([for repo in var.github_job_image_ecr_repository_names : regex("^.*:.*$", repo)])
     error_message = "Invalid repository name and version tag. A valid entry must be the name of the repo followed by a colon and the name of the version, e.g. 'myrepo:latest'"
   }
 }
@@ -67,7 +67,7 @@ variable "github_runner_binary_version" {
   description = "Version ID of the github runner binary to cache in the AMI image. No default, because GitHub doesn't support out of date versions for very long. Only required if you are not using the github_binary_bucket_* input variables."
   default     = ""
   validation {
-    condition     = can(regex("^((0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*))?$", var.github_runner_binary_version))
+    condition     = can(regex("^(latest|(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*))?$", var.github_runner_binary_version))
     error_message = "Invalid semantic version. A valid semantic version must contain three dot-separated numbers, with no leading zeros"
   }
 }
@@ -76,7 +76,7 @@ variable "iam_roles_with_admin_access_to_created_resources" {
   type        = list(string)
   description = "List of IAM Role ARNs that should have admin access to any resources created in this module that have resource policies"
   validation {
-    condition = can([for arn in var.iam_roles_with_admin_access_to_created_resources : regex("^arn:aws:iam::[0-9]+:.*$", arn)])
+    condition     = can([for arn in var.iam_roles_with_admin_access_to_created_resources : regex("^arn:aws:iam::[0-9]+:.*$", arn)])
     error_message = "Invalid Amazon Resource Name. A valid IAM Role ARN must start with 'arn:aws:iam', followed by a region, account ID and resource name separated by colons."
   }
 }
@@ -96,7 +96,7 @@ variable "imagebuilder_ec2_extra_security_groups" {
   description = "List of security group IDs to append to the temporary EC2 instance that will be created in order to generate the AMI. Defaults to an empty list"
   default     = []
   validation {
-    condition = can([for sg in var.imagebuilder_ec2_extra_security_groups : regex("^sg-[0-9a-f]{17}$", sg)])
+    condition     = can([for sg in var.imagebuilder_ec2_extra_security_groups : regex("^sg-[0-9a-f]{17}$", sg)])
     error_message = "Invalid security group ID. A valid security group ID must start with 'sg-' followed by 17 alphanumeric characters."
   }
 }
