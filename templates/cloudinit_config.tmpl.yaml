@@ -150,11 +150,11 @@ write_files:
     permissions: '0444'
     content: |
       [Unit]
-      Description=Run github scale in protection every 20 seconds
+      Description=Run github scale in protection every 4 seconds
 
       [Timer]
       OnBootSec=20
-      OnUnitActiveSec=20
+      OnUnitActiveSec=4
       AccuracySec=1s
 
       [Install]
