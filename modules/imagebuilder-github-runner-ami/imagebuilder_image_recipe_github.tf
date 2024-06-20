@@ -27,7 +27,7 @@ resource "aws_imagebuilder_image_recipe" "github" {
 
   # aws cli
   component {
-    component_arn = "arn:aws:imagebuilder:eu-west-2:aws:component/aws-cli-version-2-linux/1.0.3/1"
+    component_arn = "arn:aws:imagebuilder:eu-west-2:aws:component/aws-cli-version-2-linux/1.0.4/1"
   }
 
   # docker community edition
