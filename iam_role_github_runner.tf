@@ -75,6 +75,7 @@ data "aws_iam_policy_document" "github_runner_basic" {
     effect = "Allow"
     actions = [
       "autoscaling:StartInstanceRefresh",
+      "autoscaling:SetInstanceProtection",
     ]
     resources = [
       aws_autoscaling_group.github_runner.arn,
