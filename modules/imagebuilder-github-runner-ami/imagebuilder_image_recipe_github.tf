@@ -41,4 +41,8 @@ resource "aws_imagebuilder_image_recipe" "github" {
       component_arn = aws_imagebuilder_component.github[component.key].arn
     }
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
